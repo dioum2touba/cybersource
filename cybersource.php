@@ -140,7 +140,7 @@ class CyberSource extends PaymentModule
                             'signed_field_names' => [
                                 'name' =>'signed_field_names',
                                 'type' =>'hidden',
-                                'value' => 'access_key,profile_id,bill_address1,payment_method,bill_city,bill_to_forename,bill_to_surname,bill_country,customer_email,customer_lastname,transaction_uuid,signed_field_names,unsigned_field_names,signed_date_time,locale,transaction_type,reference_number,amount,currency',
+                                'value' => 'access_key,profile_id,bill_to_address_line1,payment_method,bill_to_address_city,bill_to_forename,bill_to_surname,bill_to_address_country,bill_to_email,customer_lastname,transaction_uuid,signed_field_names,unsigned_field_names,signed_date_time,locale,transaction_type,reference_number,amount,currency',
                             ],
                             'transaction_type' => [
                                 'name' =>'transaction_type',
@@ -152,8 +152,8 @@ class CyberSource extends PaymentModule
                                 'type' =>'hidden',
                                 'value' => uniqid(),
                             ],
-                            'customer_email' => [
-                                'name' =>'customer_email',
+                            'bill_to_email' => [
+                                'name' =>'bill_to_email',
                                 'type' =>'hidden',
                                 'value' => $this->context->customer->email,
                             ],
@@ -172,8 +172,8 @@ class CyberSource extends PaymentModule
                                 'type' =>'hidden',
                                 'value' => $this->context->customer->firstname,
                             ], 
-                            'bill_address1' => [
-                                'name' =>'bill_address1',
+                            'bill_to_address_line1' => [
+                                'name' =>'bill_to_address_line1',
                                 'type' =>'hidden',
                                 'value' => $address->address1,
                             ],
@@ -185,22 +185,22 @@ class CyberSource extends PaymentModule
                             'currency' => [
                                 'name' =>'currency',
                                 'type' =>'hidden',
-                                'value' => $this->context->currency->iso_code, // 
+                                'value' => $this->context->currency->iso_code, 
                             ],
-                            'bill_city' => [
-                                'name' =>'bill_city',
+                            'bill_to_address_city' => [
+                                'name' =>'bill_to_address_city',
                                 'type' =>'hidden',
-                                'value' => $address->city, // 
+                                'value' => $address->city, 
                             ],
-                            'bill_country' => [
-                                'name' =>'bill_country',
+                            'bill_to_address_country' => [
+                                'name' =>'bill_to_address_country',
                                 'type' =>'hidden',
-                                'value' => $address->country, // 
+                                'value' => $this->context->language->language_code, 
                             ],
                             'payment_method' => [
                                 'name' =>'payment_method',
-                                'type' =>'hidden',
-                                'value' => 'card', // 
+                                'type' =>'hidden',  
+                                'value' => 'card', 
                             ],
                             'unsigned_field_names' => [
                                 'name' =>'unsigned_field_names',

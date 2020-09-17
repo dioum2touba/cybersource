@@ -64,7 +64,7 @@ class CyberSourceValidationModuleFrontController extends ModuleFrontController
         // $params['currency'] = $currency["iso_code"];
         // $params['bill_address1'] = $address->address1;
         // $params['bill_city'] = $address->city;
-        // $params['bill_country'] = $address->country;
+        // $params['bill_to_address_country'] = $address->country;
         // $params['customer_email'] = $customer->email;
         // $params['customer_lastname'] = $customer->lastname;
 
@@ -117,6 +117,31 @@ class CyberSourceValidationModuleFrontController extends ModuleFrontController
 
         // $this->module->validateOrder($cart->id, Configuration::get('PS_OS_BANKWIRE'), $total, $this->module->displayName, NULL, $mailVars, (int)$currency->id, false, $customer->secure_key);
         // Tools::redirect('index.php?controller=order-confirmation&id_cart='.$cart->id.'&id_module='.$this->module->id.'&id_order='.$this->module->currentOrder.'&key='.$customer->secure_key);
+    }
+
+    public function postSucces()
+    {
+        $cart = $this->context->cart;
+        if ($cart->id_customer == 0 || $cart->id_address_delivery == 0 || $cart->id_address_invoice == 0 || !$this->module->active) {
+            Tools::redirect('index.php?controller=order&step=1');
+        }
+
+        // $address = new Address($cart->id_address_invoice);
+        $customer = new Customer($cart->id_customer);
+        // $currency = Currency::getCurrency($cart->id_currency);
+
+        
+
+        $currency = $this->context->currency;
+        $total = (float)$cart->getOrderTotal(true, Cart::BOTH);
+        $mailVars = array(
+            '{bankwire_owner}' => Configuration::get('BANK_WIRE_OWNER'),
+            '{bankwire_details}' => nl2br(Configuration::get('BANK_WIRE_DETAILS')),
+            '{bankwire_address}' => nl2br(Configuration::get('BANK_WIRE_ADDRESS'))
+        );
+
+        $this->module->validateOrder($cart->id, Configuration::get('PS_OS_BANKWIRE'), $total, $this->module->displayName, NULL, $mailVars, (int)$currency->id, false, $customer->secure_key);
+        Tools::redirect('index.php?controller=order-confirmation&id_cart='.$cart->id.'&id_module='.$this->module->id.'&id_order='.$this->module->currentOrder.'&key='.$customer->secure_key);
     }
 
     function sign ($params) {
