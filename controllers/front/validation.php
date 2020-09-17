@@ -39,6 +39,10 @@ class CyberSourceValidationModuleFrontController extends ModuleFrontController
             Tools::redirect('index.php?controller=order&step=1');
         }
 
+        // $address = new Address($cart->id_address_invoice);
+        $customer = new Customer($cart->id_customer);
+        // $currency = Currency::getCurrency($cart->id_currency);
+
         // Check that this payment option is still available in case the customer changed his address just before the end of the checkout process
         $authorized = false;
         foreach (Module::getPaymentModules() as $module) {
@@ -55,34 +59,53 @@ class CyberSourceValidationModuleFrontController extends ModuleFrontController
         foreach($_REQUEST as $name => $value) {
             $params[$name] = $value;
         }
-            
+    
+        // $params['locale'] = $address->iso_code;
+        // $params['currency'] = $currency["iso_code"];
+        // $params['bill_address1'] = $address->address1;
+        // $params['bill_city'] = $address->city;
+        // $params['bill_country'] = $address->country;
+        // $params['customer_email'] = $customer->email;
+        // $params['customer_lastname'] = $customer->lastname;
+
+        if (!Validate::isLoadedObject($customer))
+            Tools::redirect('index.php?controller=order&step=1');
+
+        // $id_address_delivery =  $cart->id_address_delivery;
+        // $id_address_invoice = $cart->id_address_invoice;
 
         // Pour recupérer les valeurs et les renvoyer dans la page de confirmation
+        $this->context->smarty->assign([
+            'params' => $_REQUEST,
+            'signature' => $this->sign($params),
+            // 'currency_val' => $this->context->currency,
+            // 'amount' => $params['amount'],
+            // 'reference_number' => $params['reference_number'],
+            // 'signed_date_time' => $params['signed_date_time'],
+            // 'transaction_uuid' => $params['transaction_uuid'],
+            // 'locale' => $params['locale'],
+            // 'cust_currency' => $this->context->cart->id_currency,
+            // 'currencies' => $this->module->getCurrency((int)$cart->id_currency),
+            // 'bill_address1' => $address->address1,
+            // 'bill_city' => $address->city,
+            // 'bill_country' => $address->country,
+            // 'customer_email' => $customer->email,
+            // 'customer_lastname' => $customer->lastname,
+            // 'id_customer' => $cart->id_customer, 
+            // 'id_address_delivery' => $id_address_delivery, 
+            // 'id_address_invoice' => $id_address_invoice, 
+        ]);
+
         // $this->context->smarty->assign([
         //     'params' => $_REQUEST,
         //     'signature' => $this->sign($params),
-        //     'currency_val' => $this->context->currency,
-        //     'amount' => $params['amount'],
-        //     'reference_number' => $params['reference_number'],
-        //     'signed_date_time' => $params['signed_date_time'],
-        //     'transaction_uuid' => $params['transaction_uuid'],
-        //     'locale' => $params['locale'],
-        //     'cust_currency' => $this->context->cart->id_currency,
-        //     'currencies' => $this->module->getCurrency((int)$cart->id_currency),
+        //     'bill_address1' => $customer->bill_address1
         // ]);
-
-        $this->context->smarty->assign([
-            'params' => $_REQUEST,
-            'signature' => $this->sign($params)
-        ]);
 
         //$this->setTemplate('payment_return.tpl');
         $this->setTemplate('module:cybersource/views/templates/front/payment_confirm.tpl');
 
 
-        // $customer = new Customer($cart->id_customer);
-        // if (!Validate::isLoadedObject($customer))
-        //     Tools::redirect('index.php?controller=order&step=1');
 
         // $currency = $this->context->currency;
         // $total = (float)$cart->getOrderTotal(true, Cart::BOTH);
@@ -97,7 +120,7 @@ class CyberSourceValidationModuleFrontController extends ModuleFrontController
     }
 
     function sign ($params) {
-        return $this->signData($this->buildDataToSign($params), '072b4e72216d45a1b8daaa441e5acfc295cdde6a93cd441cb248f3ed602a5d7fda4e0f7025ac4dd5bf1b1ae7cc884cfb1a464524635e4e4cb87c0c681fdd16efa63340015cd04fd79f2e7e76a52c39d4a691279f2f124ad9b69c8feb7c4a595d8d49a4245cb84e0f859a5aebb77e2a7ba7243921054e4b36baf9601c1ec90c81');
+        return $this->signData($this->buildDataToSign($params), Configuration::get('SECRET_KEY'));
     }
     
     function signData($data, $secretKey) {

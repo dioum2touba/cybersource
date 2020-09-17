@@ -83,10 +83,7 @@ class CyberSource extends PaymentModule
         }
 
         $payment_options = [
-           // $this->getOfflinePaymentOption(),
-            $this->getExternalPaymentOption(),
-           // $this->getEmbeddedPaymentOption(),
-            // $this->getIframePaymentOption(),
+            $this->getExternalPaymentOption()
         ];
 
         return $payment_options;
@@ -107,20 +104,10 @@ class CyberSource extends PaymentModule
         return false;
     }
 
-    public function getOfflinePaymentOption()
-    {
-        $offlineOption = new PaymentOption();
-        $offlineOption->setCallToActionText($this->l('Pay offline'))
-                      ->setAction($this->context->link->getModuleLink($this->name, 'validation', array(), true))
-                      ->setAdditionalInformation($this->context->smarty->fetch('module:cybersource/views/templates/front/payment_infos.tpl'))
-                      ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_.$this->name.'/payment.png'));
-
-        return $offlineOption;
-    }
-
     public function getExternalPaymentOption()
     {
-        $date = date_create();
+        $address = new Address((int)$this->context->cart->id_address_delivery);     
+        
         $externalOption = new PaymentOption();
         $externalOption->setCallToActionText($this->l('Pay via CyberSource'))
                        ->setAction($this->context->link->getModuleLink($this->name, 'validation', array(), true))
@@ -134,16 +121,6 @@ class CyberSource extends PaymentModule
                                 'name' =>'amount',
                                 'type' =>'hidden',
                                 'value' => $this->context->cart->getOrderTotal(true, Cart::BOTH),
-                            ],
-                            'currency' => [
-                                'name' =>'currency',
-                                'type' =>'hidden',
-                                'value' => 'USD',
-                            ],
-                            'locale' => [
-                                'name' =>'locale',
-                                'type' =>'hidden',
-                                'value' => 'en',
                             ],
                             'profile_id' => [
                                 'name' =>'profile_id',
@@ -163,7 +140,7 @@ class CyberSource extends PaymentModule
                             'signed_field_names' => [
                                 'name' =>'signed_field_names',
                                 'type' =>'hidden',
-                                'value' => 'access_key,profile_id,transaction_uuid,signed_field_names,unsigned_field_names,signed_date_time,locale,transaction_type,reference_number,amount,currency',
+                                'value' => 'access_key,profile_id,bill_address1,payment_method,bill_city,bill_to_forename,bill_to_surname,bill_country,customer_email,customer_lastname,transaction_uuid,signed_field_names,unsigned_field_names,signed_date_time,locale,transaction_type,reference_number,amount,currency',
                             ],
                             'transaction_type' => [
                                 'name' =>'transaction_type',
@@ -175,14 +152,64 @@ class CyberSource extends PaymentModule
                                 'type' =>'hidden',
                                 'value' => uniqid(),
                             ],
+                            'customer_email' => [
+                                'name' =>'customer_email',
+                                'type' =>'hidden',
+                                'value' => $this->context->customer->email,
+                            ],
+                            'customer_lastname' => [
+                                'name' =>'customer_lastname',
+                                'type' =>'hidden',
+                                'value' => $this->context->customer->lastname,
+                            ],
+                            'bill_to_forename' => [
+                                'name' =>'bill_to_forename',
+                                'type' =>'hidden',
+                                'value' => $this->context->customer->firstname,
+                            ],
+                            'bill_to_surname' => [
+                                'name' =>'bill_to_surname',
+                                'type' =>'hidden',
+                                'value' => $this->context->customer->firstname,
+                            ], 
+                            'bill_address1' => [
+                                'name' =>'bill_address1',
+                                'type' =>'hidden',
+                                'value' => $address->address1,
+                            ],
+                            'locale' => [
+                                'name' =>'locale',
+                                'type' =>'hidden',
+                                'value' => $this->context->language->language_code,
+                            ],
+                            'currency' => [
+                                'name' =>'currency',
+                                'type' =>'hidden',
+                                'value' => $this->context->currency->iso_code, // 
+                            ],
+                            'bill_city' => [
+                                'name' =>'bill_city',
+                                'type' =>'hidden',
+                                'value' => $address->city, // 
+                            ],
+                            'bill_country' => [
+                                'name' =>'bill_country',
+                                'type' =>'hidden',
+                                'value' => $address->country, // 
+                            ],
+                            'payment_method' => [
+                                'name' =>'payment_method',
+                                'type' =>'hidden',
+                                'value' => 'card', // 
+                            ],
                             'unsigned_field_names' => [
                                 'name' =>'unsigned_field_names',
                                 'type' =>'hidden',
                                 'value' => '',
-                            ],
+                            ], 
                         ])
-                       //->setAdditionalInformation($this->context->smarty->fetch('module:cybersource/views/templates/front/payment_infos.tpl'))
-                       ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_.$this->name.'/payment.png'));
+                        //->setAdditionalInformation($this->context->smarty->fetch('module:cybersource/views/templates/front/payment_infos.tpl'))
+                        ->setLogo(Media::getMediaPath(_PS_MODULE_DIR_.$this->name.'/payment.png'));
 
         return $externalOption;
     }
